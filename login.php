@@ -1,52 +1,37 @@
 <?php 
+session_start();
 include("config.php");
 $error="";
 $msg="";
-if(isset($_REQUEST['reg']))
+if(isset($_REQUEST['login']))
 {
-	$name=$_REQUEST['name'];
 	$email=$_REQUEST['email'];
-	$phone=$_REQUEST['phone'];
 	$pass=$_REQUEST['pass'];
-	$utype=$_REQUEST['utype'];
-	
-	$uimage=$_FILES['uimage']['name'];
-	$temp_name1 = $_FILES['uimage']['tmp_name'];
 	$pass= sha1($pass);
 	
-	$query = "SELECT * FROM user where uemail='$email'";
-	$res=mysqli_query($con, $query);
-	$num=mysqli_num_rows($res);
-	
-	if($num == 1)
+	if(!empty($email) && !empty($pass))
 	{
-		$error = "<p class='alert alert-warning'>Email Id already Exist</p> ";
+		$sql = "SELECT * FROM user where uemail='$email' && upass='$pass'";
+		$result=mysqli_query($con, $sql);
+		$row=mysqli_fetch_array($result);
+		   if($row){
+			   
+				$_SESSION['uid']=$row['uid'];
+				$_SESSION['uemail']=$email;
+				header("location:index.php");
+				
+		   }
+		   else{
+			   $error = "<p class='alert alert-warning'>Email or Password doesnot match!</p> ";
+		   }
+	}else{
+		$error = "<p class='alert alert-warning'>Please Fill all the fields</p>";
 	}
-	else
-	{
-		
-		if(!empty($name) && !empty($email) && !empty($phone) && !empty($pass) && !empty($uimage))
-		{
-			
-			$sql="INSERT INTO user (uname,uemail,uphone,upass,utype,uimage) VALUES ('$name','$email','$phone','$pass','$utype','$uimage')";
-			$result=mysqli_query($con, $sql);
-			move_uploaded_file($temp_name1,"admin/user/$uimage");
-			   if($result){
-				   $msg = "<p class='alert alert-success'>Register Successfully</p> ";
-			   }
-			   else{
-				   $error = "<p class='alert alert-warning'>Register Not Successfully</p> ";
-			   }
-		}else{
-			$error = "<p class='alert alert-warning'>Please Fill all the fields</p>";
-		}
-	}
-	
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<!-- FOR MORE PROJECTS visit: codeastro.com -->
+
 <head>
 <!-- Required meta tags -->
 <meta charset="utf-8">
@@ -74,7 +59,7 @@ if(isset($_REQUEST['reg']))
 <link rel="stylesheet" type="text/css" href="fonts/flaticon/flaticon.css">
 <link rel="stylesheet" type="text/css" href="css/style.css">
 <link rel="stylesheet" type="text/css" href="css/login.css">
-
+<!-- FOR MORE PROJECTS visit: codeastro.com -->
 <!--	Title
 	=========================================================-->
 <title>Real Estate PHP</title>
@@ -97,20 +82,20 @@ if(isset($_REQUEST['reg']))
     <div class="row"> 
         <!--	Header start  -->
 		<?php include("include/header.php");?>
-        <!--	Header end  --><!-- FOR MORE PROJECTS visit: codeastro.com -->
+        <!--	Header end  -->
         
         <!--	Banner   --->
         <!-- <div class="banner-full-row page-banner" style="background-image:url('images/breadcromb.jpg');">
             <div class="container">
                 <div class="row">
                     <div class="col-md-6">
-                        <h2 class="page-name float-left text-white text-uppercase mt-1 mb-0"><b>Register</b></h2>
+                        <h2 class="page-name float-left text-white text-uppercase mt-1 mb-0"><b>Login</b></h2>
                     </div>
                     <div class="col-md-6">
                         <nav aria-label="breadcrumb" class="float-left float-md-right">
                             <ol class="breadcrumb bg-transparent m-0 p-0">
                                 <li class="breadcrumb-item text-white"><a href="#">Home</a></li>
-                                <li class="breadcrumb-item active">Register</li>
+                                <li class="breadcrumb-item active">Login</li>
                             </ol>
                         </nav>
                     </div>
@@ -127,46 +112,19 @@ if(isset($_REQUEST['reg']))
                 	<div class="loginbox">
                         <div class="login-right">
 							<div class="login-right-wrap">
-								<h1>Register</h1>
+								<h1>Login</h1>
 								<p class="account-subtitle">Access to our dashboard</p>
 								<?php echo $error; ?><?php echo $msg; ?>
 								<!-- Form -->
-								<form method="post" enctype="multipart/form-data">
-									<div class="form-group">
-										<input type="text"  name="name" class="form-control" placeholder="Your Name*">
-									</div>
+								<form method="post">
 									<div class="form-group">
 										<input type="email"  name="email" class="form-control" placeholder="Your Email*">
 									</div>
 									<div class="form-group">
-										<input type="text"  name="phone" class="form-control" placeholder="Your Phone*" maxlength="10">
-									</div>
-									<div class="form-group">
-										<input type="password" name="pass"  class="form-control" placeholder="Your Password*">
-									</div>
-
-									 <div class="form-check-inline">
-									  <label class="form-check-label">
-										<input type="radio" class="form-check-input" name="utype" value="user" checked>User
-									  </label>
-									</div><!-- FOR MORE PROJECTS visit: codeastro.com -->
-									<div class="form-check-inline">
-									  <label class="form-check-label">
-										<input type="radio" class="form-check-input" name="utype" value="agent">Agent
-									  </label>
-									</div>
-									<div class="form-check-inline disabled">
-									  <label class="form-check-label">
-										<input type="radio" class="form-check-input" name="utype" value="builder">Builder
-									  </label>
-									</div> 
-									
-									<div class="form-group">
-										<label class="col-form-label"><b>User Image</b></label>
-										<input class="form-control" name="uimage" type="file">
+										<input type="password" name="pass"  class="form-control" placeholder="Your Password">
 									</div>
 									
-									<button class="btn btn-success" name="reg" value="Register" type="submit">Register</button>
+										<button class="btn btn-success" name="login" value="Login" type="submit">Login</button>
 									
 								</form>
 								
@@ -174,10 +132,10 @@ if(isset($_REQUEST['reg']))
 									<span class="or-line"></span>
 									<span class="span-or">or</span>
 								</div>
-								
+								<!-- FOR MORE PROJECTS visit: codeastro.com -->
 								<!-- Social Login -->
 								<!-- <div class="social-login">
-									<span>Register with</span>
+									<span>Login with</span>
 									<a href="#" class="facebook"><i class="fab fa-facebook-f"></i></a>
 									<a href="#" class="google"><i class="fab fa-google"></i></a>
 									<a href="#" class="facebook"><i class="fab fa-twitter"></i></a>
@@ -185,9 +143,9 @@ if(isset($_REQUEST['reg']))
 								</div> -->
 								<!-- /Social Login -->
 								
-								<div class="text-center dont-have">Already have an account? <a href="login.php">Login</a></div>
+								<div class="text-center dont-have">Don't have an account? <a href="register.php">Register</a></div>
 								
-							</div><!-- FOR MORE PROJECTS visit: codeastro.com -->
+							</div>
                         </div>
                     </div>
                 </div>
@@ -196,7 +154,7 @@ if(isset($_REQUEST['reg']))
 	<!--	login  -->
         
         
-        <!--	Footer   start-->
+        <!--	Footer   start--><!-- FOR MORE PROJECTS visit: codeastro.com -->
 		<?php include("include/footer.php");?>
 		<!--	Footer   start-->
         
@@ -206,7 +164,7 @@ if(isset($_REQUEST['reg']))
     </div>
 </div>
 <!-- Wrapper End --> 
-<!-- FOR MORE PROJECTS visit: codeastro.com -->
+
 <!--	Js Link
 ============================================================--> 
 <script src="js/jquery.min.js"></script> 
